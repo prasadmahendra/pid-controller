@@ -26,6 +26,8 @@ void PID::Init(double Kp, double Ki, double Kd) {
   
   this->twiddle_state = TWIDDLE_UP;
   this->steer_history = std::vector<double>(steering_avg_over);
+  
+  std::cout.precision(17);
 }
 
 void PID::UpdateError(double cte) {
@@ -75,20 +77,29 @@ void PID::TwiddleCoeffsPre(double tolerance) {
   std::vector<double> K = {this->Kp, this->Ki, this->Kd};
   std::vector<double> dK = {this->dKp, this->dKi, this->dKd};
 
-  if( std::accumulate(dK.begin(), dK.end(), 0.0) <= tolerance ) {
+  if( std::accumulate(dK.begin(), dK.end(), 0.0) < tolerance ) {
+    std::cout << " Kp = " << std::fixed << this->Kp << " Ki = " << std::fixed << this->Ki << " Kd = " << std::fixed << this->Kd << std::fixed << " tol = " << std::accumulate(dK.begin(), dK.end(), 0.0) << std::endl;
     return;
+  } else {
+    std::cout << " **** dKp = " << std::fixed << this->dKp << " dKi = " << std::fixed << this->dKi << " dKd = " << std::fixed << this->dKd << " tol = " << std::accumulate(dK.begin(), dK.end(), 0.0)  << std::endl;
   }
   
   switch(twiddle_state) {
     case TWIDDLE_UP:
       K[current_twiddle_param] += dK[current_twiddle_param];
       next_state = TWIDDLE_UP_CHECK_ERROR;
-      std::cerr << " twiddle state TWIDDLE_UP -> TWIDDLE_UP_CHECK_ERROR (" << current_twiddle_param << ")" << std::endl;
+#ifdef DEBUG
+      std::cout << " twiddle state TWIDDLE_UP -> TWIDDLE_UP_CHECK_ERROR (" << current_twiddle_param << ")" << std::endl;
+#endif
       break;
+
     case TWIDDLE_AFTER_RESTORE:
       next_state = TWIDDLE_RESTORE_CHECK_ERROR;
-      std::cerr << " twiddle state TWIDDLE_AFTER_RESTORE -> TWIDDLE_RESTORE_CHECK_ERROR (" << current_twiddle_param << ")" << std::endl;
+#ifdef DEBUG
+      std::cout << " twiddle state TWIDDLE_AFTER_RESTORE -> TWIDDLE_RESTORE_CHECK_ERROR (" << current_twiddle_param << ")" << std::endl;
+#endif
       break;
+      
     default:
       std::cerr << "TwiddleCoeffsPre state not handled - " << twiddle_state << std::endl;
       break;
@@ -118,12 +129,16 @@ void PID::TwiddleCoeffsPost(double tolerance) {
       if ( TotalError() < best_error ) {
         best_error = TotalError();
         dK[current_twiddle_param] *= 1.1;
-        std::cerr << " twiddle state TWIDDLE_UP_CHECK_ERROR -> TWIDDLE_UP (" << current_twiddle_param << ")" << std::endl;
+#ifdef DEBUG
+        std::cout << " twiddle state TWIDDLE_UP_CHECK_ERROR -> TWIDDLE_UP (" << current_twiddle_param << ")" << std::endl;
+#endif
         next_state = TWIDDLE_UP;
       } else {
         // restore ...
-        K[current_twiddle_param] -= 2 * dK[current_twiddle_param];
-        std::cerr << " twiddle state TWIDDLE_UP_CHECK_ERROR -> TWIDDLE_AFTER_RESTORE (" << current_twiddle_param << ")" << std::endl;
+        K[current_twiddle_param] -= 2.0 * dK[current_twiddle_param];
+#ifdef DEBUG
+        std::cout << " twiddle state TWIDDLE_UP_CHECK_ERROR -> TWIDDLE_AFTER_RESTORE (" << current_twiddle_param << ")" << std::endl;
+#endif
         next_state = TWIDDLE_AFTER_RESTORE;
       }
       break;
@@ -131,12 +146,16 @@ void PID::TwiddleCoeffsPost(double tolerance) {
       if ( TotalError() < best_error ) {
         best_error = TotalError();
         dK[current_twiddle_param] *= 1.1;
-        std::cerr << " twiddle state TWIDDLE_RESTORE_CHECK_ERROR -> TWIDDLE_UP (" << current_twiddle_param << ")" << std::endl;
+#ifdef DEBUG
+        std::cout << " twiddle state TWIDDLE_RESTORE_CHECK_ERROR -> TWIDDLE_UP (" << current_twiddle_param << ")" << std::endl;
+#endif
         next_state = TWIDDLE_UP;
       } else {
         K[current_twiddle_param] += dK[current_twiddle_param];
         dK[current_twiddle_param] *= 0.9;
-        std::cerr << " twiddle state TWIDDLE_RESTORE_CHECK_ERROR -> TWIDDLE_UP (" << current_twiddle_param << ")" << std::endl;
+#ifdef DEBUG
+        std::cout << " twiddle state TWIDDLE_RESTORE_CHECK_ERROR -> TWIDDLE_UP (" << current_twiddle_param << ")" << std::endl;
+#endif
         next_state = TWIDDLE_UP;
       }
       break;
