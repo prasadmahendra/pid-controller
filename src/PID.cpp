@@ -26,8 +26,13 @@ void PID::Init(double Kp, double Ki, double Kd) {
   
   this->twiddle_state = TWIDDLE_UP;
   this->steer_history = std::vector<double>(steering_avg_over);
+  this->auto_twiddle = false;
   
   std::cout.precision(17);
+}
+
+void PID::SetAutoTwiddle(bool twiddle) {
+  this->auto_twiddle = twiddle;
 }
 
 void PID::UpdateError(double cte) {
@@ -73,6 +78,10 @@ double PID::SteeringAngle(double min, double max) {
 }
 
 void PID::TwiddleCoeffsPre(double tolerance) {
+  if( !auto_twiddle ) {
+    return;
+  }
+  
   TWIDDLE_STATES next_state = twiddle_state;
   std::vector<double> K = {this->Kp, this->Ki, this->Kd};
   std::vector<double> dK = {this->dKp, this->dKi, this->dKd};
@@ -116,6 +125,10 @@ void PID::TwiddleCoeffsPre(double tolerance) {
 }
 
 void PID::TwiddleCoeffsPost(double tolerance) {
+  if( !auto_twiddle ) {
+    return;
+  }
+  
   TWIDDLE_STATES next_state = twiddle_state;
   std::vector<double> K = {this->Kp, this->Ki, this->Kd};
   std::vector<double> dK = {this->dKp, this->dKi, this->dKd};
