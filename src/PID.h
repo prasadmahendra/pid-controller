@@ -41,6 +41,7 @@ private:
   };
   
   TWIDDLE_STATES twiddle_state;
+  bool auto_twiddle;
   
 public:
   
@@ -74,6 +75,7 @@ public:
   
   double SteeringAngle(double min=-1, double max=1);
   
+  void SetAutoTwiddle(bool twiddle);
   void TwiddleCoeffsPre(double tolerance=0.2);
   void TwiddleCoeffsPost(double tolerance=0.2);
 };

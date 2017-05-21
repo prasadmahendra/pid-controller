@@ -32,4 +32,7 @@
 4. Open `PARTICLE_FILTER.xcodeproj` in xcode
 5. Run it: `./pid`
 
-###
+
+
+References:
+http://molefrog.com/pidnn-talk/#pid-demo

@@ -33,9 +33,10 @@ int main()
   uWS::Hub h;
 
   // Initialize the pid
-  double Kp = 0, Ki = 0, Kd = 0;
+  double Kp = 1.0, Ki = 0, Kd = 15.0;
   PID pid;
   pid.Init(Kp, Ki, Kd);
+  pid.SetAutoTwiddle(false);
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -62,7 +63,7 @@ int main()
           steer_value = pid.SteeringAngle();
           
           // DEBUG
-          float throttle = 0.2;
+          float throttle = 1.0;
           if( fabs(angle) > 10 && speed > 10 ) {
             // ... let's step off the gas and slow down a bit! todo: use a second PID controller for throttle.
             throttle = 0.0;
