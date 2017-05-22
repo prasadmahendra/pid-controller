@@ -43,41 +43,27 @@ private:
   TWIDDLE_STATES twiddle_state;
   bool auto_twiddle;
   
+  void TwiddleCoeffsPre(double tolerance=0.2);
+  void TwiddleCoeffsPost(double tolerance=0.2);
+  
 public:
   
-  
-  
-
-  /*
-  * Constructor
-  */
   PID();
 
-  /*
-  * Destructor.
-  */
   virtual ~PID();
 
-  /*
-  * Initialize PID.
-  */
+  // Initialize PID.
   void Init(double Kp, double Ki, double Kd);
 
-  /*
-  * Update the PID error variables given cross track error.
-  */
+  // Update the PID error variables given cross track error.
   void UpdateError(double cte);
 
-  /*
-  * Calculate the total PID error.
-  */
+  // Calculate the total PID error.
   double TotalError();
   
   double SteeringAngle(double min=-1, double max=1);
   
   void SetAutoTwiddle(bool twiddle);
-  void TwiddleCoeffsPre(double tolerance=0.2);
-  void TwiddleCoeffsPost(double tolerance=0.2);
 };
 
 #endif /* PID_H */
